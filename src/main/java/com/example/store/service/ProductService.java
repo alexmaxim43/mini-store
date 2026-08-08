@@ -1,15 +1,17 @@
 package com.example.store.service;
 
+import com.example.store.dto.product.ChangePriceRequest;
+import com.example.store.dto.product.CreateProductRequest;
+import com.example.store.dto.product.ProductResponse;
 import com.example.store.entity.Product;
 import com.example.store.exception.ProductAlreadyExistsException;
 import com.example.store.exception.ProductNotFoundException;
+import com.example.store.mapper.ProductMapper;
 import com.example.store.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 public class ProductService {
@@ -21,38 +23,44 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product getProduct(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("ID", id.toString()));
+    private Product getProductEntityBySku(String sku) {
+        return productRepository.findBySku(sku)
+                .orElseThrow(() -> new ProductNotFoundException("SKU", sku));
     }
 
-    public Product getProductBySku(String sku){
-        return productRepository.findBySku(sku).orElseThrow(() -> new ProductNotFoundException("SKU", sku));
+    public ProductResponse getProductBySku(String sku) {
+        Product product = getProductEntityBySku(sku);
+
+        return ProductMapper.toResponse(product);
     }
 
-    public Page<Product> getAllProducts(int page, int size) {
+    public Page<ProductResponse> getAllProducts(int page, int size) {
         size = Math.min(size, MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, size);
-        return productRepository.findAll(pageable);
+        return productRepository.findAll(pageable).map(ProductMapper::toResponse);
     }
 
-    public Product createProduct(Product product) {
-        if (productRepository.existsBySku(product.getSku())) {
-            throw new ProductAlreadyExistsException(product.getSku());
+    public ProductResponse createProduct(CreateProductRequest createProductRequest) {
+        if (productRepository.existsBySku(createProductRequest.sku())) {
+            throw new ProductAlreadyExistsException(createProductRequest.sku());
         }
 
-        return productRepository.save(product);
+        Product product = ProductMapper.toEntity(createProductRequest);
+        Product savedProduct = productRepository.save(product);
+
+        return ProductMapper.toResponse(savedProduct);
     }
 
-    public Product changePrice(String sku, BigDecimal newPrice) {
-        Product product = getProductBySku(sku);
+    public ProductResponse changePrice(String sku, ChangePriceRequest changePriceRequest) {
+        Product product = getProductEntityBySku(sku);
 
-        product.changePrice(newPrice);
+        product.changePrice(changePriceRequest.price());
 
-        return productRepository.save(product);
+        return ProductMapper.toResponse(productRepository.save(product));
     }
 
-    public void deleteProduct(String sku){
-        Product product = getProductBySku(sku);
+    public void deleteProduct(String sku) {
+        Product product = getProductEntityBySku(sku);
 
         productRepository.delete(product);
     }

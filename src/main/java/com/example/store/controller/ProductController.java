@@ -22,30 +22,23 @@ public class ProductController {
 
     @GetMapping("/{sku}")
     public ProductResponse getProductBySku(@PathVariable String sku) {
-        return ProductMapper.toResponse(productService.getProductBySku(sku));
+        return productService.getProductBySku(sku);
     }
 
     @GetMapping
     public Page<ProductResponse> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
-        return productService.getAllProducts(page, size).map(ProductMapper::toResponse);
+        return productService.getAllProducts(page, size);
     }
 
     @PostMapping
     public ProductResponse addProduct(@RequestBody @Valid CreateProductRequest createProductRequest) {
-        return ProductMapper.toResponse(
-                productService.createProduct(
-                        ProductMapper.toEntity(createProductRequest)
-                )
-        );
+        return productService.createProduct(createProductRequest);
     }
 
     @PatchMapping("/{sku}/price")
     public ProductResponse changePrice(@PathVariable String sku, @RequestBody @Valid ChangePriceRequest changePriceRequest) {
-        return ProductMapper.toResponse(
-                productService.changePrice(
-                        sku, changePriceRequest.price()
-                )
-        );
+        return productService.changePrice(sku, changePriceRequest);
+
     }
 
     @DeleteMapping("/{sku}")
