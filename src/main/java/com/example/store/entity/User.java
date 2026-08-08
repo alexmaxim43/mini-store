@@ -19,7 +19,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    protected User() {}
+    protected User() {
+    }
 
     public User(String email, String password, String firstName, String lastName, Role role) {
         this.email = email;
@@ -33,7 +34,7 @@ public class User {
         return id;
     }
 
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
 

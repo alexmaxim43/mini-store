@@ -17,14 +17,18 @@ public class Product {
     private BigDecimal price;
     @Column(nullable = false)
     private int stock;
+    @Column(nullable = false, unique = true)
+    private String sku;
     private String description;
-    
-    protected Product() {}
 
-    public Product(String name, BigDecimal price, int stock, String description) {
+    protected Product() {
+    }
+
+    public Product(String name, BigDecimal price, int stock, String sku, String description) {
         changeName(name);
         changePrice(price);
         addStock(stock);
+        this.sku = sku;
         this.description = description;
     }
 
@@ -44,13 +48,17 @@ public class Product {
         return stock;
     }
 
+    public String getSku() {
+        return sku;
+    }
+
     public String getDescription() {
         return description;
     }
 
     public void changeName(String name) {
         if (name == null || name.isBlank()) {
-           throw new IllegalArgumentException("Name cannot be blank");
+            throw new IllegalArgumentException("Name cannot be blank");
         }
         this.name = name;
     }
@@ -66,21 +74,20 @@ public class Product {
     public void addStock(int stock) {
         if (stock > 0) {
             this.stock += stock;
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Stock must be greater than zero");
         }
     }
 
     public void removeStock(int stock) {
-       if (stock <= 0) {
-           throw new IllegalArgumentException("Stock must be greater than zero");
-       }
+        if (stock <= 0) {
+            throw new IllegalArgumentException("Stock must be greater than zero");
+        }
 
-       if(stock > this.stock) {
+        if (stock > this.stock) {
             throw new InsufficientStockException();
-       }
-       this.stock -= stock;
+        }
+        this.stock -= stock;
     }
 
     public void setDescription(String description) {
