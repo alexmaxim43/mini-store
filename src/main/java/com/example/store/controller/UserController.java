@@ -8,6 +8,7 @@ import com.example.store.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,8 +47,8 @@ public class UserController {
     }
 
     @PatchMapping("/password")
-    public UserResponse changePassword(@RequestParam String email, @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
-        return userService.changePassword(email, changePasswordRequest);
+    public UserResponse changePassword(Authentication authentication, @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+        return userService.changePassword(authentication.getName(), changePasswordRequest);
     }
 
     @DeleteMapping

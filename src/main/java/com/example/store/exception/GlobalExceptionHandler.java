@@ -85,4 +85,13 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred"
         );
     }
+
+    @ExceptionHandler(PasswordReuseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlePasswordReused(PasswordReuseException exception) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                exception.getMessage()
+        );
+    }
 }

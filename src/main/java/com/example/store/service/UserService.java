@@ -5,6 +5,7 @@ import com.example.store.dto.user.CreateUserRequest;
 import com.example.store.dto.user.UserResponse;
 import com.example.store.entity.User;
 import com.example.store.enums.Role;
+import com.example.store.exception.PasswordReuseException;
 import com.example.store.exception.UserAlreadyExistsException;
 import com.example.store.exception.UserNotFoundException;
 import com.example.store.mapper.UserMapper;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,9 +24,11 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private User getUserEntityByEmail(String email) {
@@ -53,9 +57,12 @@ public class UserService {
         if (userRepository.existsByEmail(createUserRequest.email())) {
             throw new UserAlreadyExistsException(createUserRequest.email());
         }
+
+        String encodedPassword = passwordEncoder.encode(createUserRequest.password());
+
         User customer = User.createCustomer(
                 createUserRequest.email(),
-                createUserRequest.password(),
+                encodedPassword,
                 createUserRequest.firstName(),
                 createUserRequest.lastName());
 
@@ -69,9 +76,12 @@ public class UserService {
         if (userRepository.existsByEmail(createUserRequest.email())) {
             throw new UserAlreadyExistsException(createUserRequest.email());
         }
+
+        String encodedPassword = passwordEncoder.encode(createUserRequest.password());
+
         User admin = User.createAdmin(
                 createUserRequest.email(),
-                createUserRequest.password(),
+                encodedPassword,
                 createUserRequest.firstName(),
                 createUserRequest.lastName());
 
@@ -89,7 +99,13 @@ public class UserService {
     public UserResponse changePassword(String email, ChangePasswordRequest changePasswordRequest) {
         User user = getUserEntityByEmail(email);
 
-        user.changePassword(changePasswordRequest.newPassword());
+        if (passwordEncoder.matches(changePasswordRequest.newPassword(), user.getPassword())) {
+            throw new PasswordReuseException();
+        }
+
+        String encodedPassword = passwordEncoder.encode(changePasswordRequest.newPassword());
+
+        user.changePassword(encodedPassword);
 
         User userUpdated = userRepository.save(user);
 

@@ -3,7 +3,6 @@ package com.example.store.controller;
 import com.example.store.dto.product.ChangePriceRequest;
 import com.example.store.dto.product.CreateProductRequest;
 import com.example.store.dto.product.ProductResponse;
-import com.example.store.mapper.ProductMapper;
 import com.example.store.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
