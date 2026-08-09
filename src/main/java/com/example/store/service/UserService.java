@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -105,11 +106,13 @@ public class UserService {
         return UserMapper.toResponse(savedAdmin);
     }
 
+    @Transactional
     public void deleteUser(String email) {
         userRepository.delete(getUserEntityByEmail(email));
         logger.info("Deleted user with email {}", email);
     }
 
+    @Transactional
     public UserResponse changePassword(String email, ChangePasswordRequest changePasswordRequest) {
         User user = getUserEntityByEmail(email);
 

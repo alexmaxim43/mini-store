@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductService {
@@ -66,6 +67,7 @@ public class ProductService {
         return ProductMapper.toResponse(savedProduct);
     }
 
+    @Transactional
     public ProductResponse changePrice(String sku, ChangePriceRequest changePriceRequest) {
         Product product = getProductEntityBySku(sku);
 
@@ -78,6 +80,7 @@ public class ProductService {
         return ProductMapper.toResponse(savedProduct);
     }
 
+    @Transactional
     public void deleteProduct(String sku) {
         Product product = getProductEntityBySku(sku);
 
