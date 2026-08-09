@@ -8,6 +8,8 @@ import com.example.store.exception.ProductAlreadyExistsException;
 import com.example.store.exception.ProductNotFoundException;
 import com.example.store.mapper.ProductMapper;
 import com.example.store.repository.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductService {
     private static final int MAX_PAGE_SIZE = 100;
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository productRepository;
 
@@ -48,6 +51,8 @@ public class ProductService {
         Product product = ProductMapper.toEntity(createProductRequest);
         Product savedProduct = productRepository.save(product);
 
+        logger.info("Product with SKU {} was created", savedProduct.getSku());
+
         return ProductMapper.toResponse(savedProduct);
     }
 
@@ -56,12 +61,18 @@ public class ProductService {
 
         product.changePrice(changePriceRequest.price());
 
-        return ProductMapper.toResponse(productRepository.save(product));
+        Product savedProduct = productRepository.save(product);
+
+        logger.info("Price changed for product with SKU {}", sku);
+
+        return ProductMapper.toResponse(savedProduct);
     }
 
     public void deleteProduct(String sku) {
         Product product = getProductEntityBySku(sku);
 
         productRepository.delete(product);
+
+        logger.info("Product with SKU {} was deleted", sku);
     }
 }

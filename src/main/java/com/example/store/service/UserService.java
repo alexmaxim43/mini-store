@@ -9,6 +9,8 @@ import com.example.store.exception.UserAlreadyExistsException;
 import com.example.store.exception.UserNotFoundException;
 import com.example.store.mapper.UserMapper;
 import com.example.store.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private static final int MAX_PAGE_SIZE = 100;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
 
@@ -56,7 +59,10 @@ public class UserService {
                 createUserRequest.firstName(),
                 createUserRequest.lastName());
 
-        return UserMapper.toResponse(userRepository.save(customer));
+        User savedCustomer = userRepository.save(customer);
+        logger.info("Created user with email {}", savedCustomer.getEmail());
+
+        return UserMapper.toResponse(savedCustomer);
     }
 
     public UserResponse createAdmin(CreateUserRequest createUserRequest) {
@@ -69,11 +75,15 @@ public class UserService {
                 createUserRequest.firstName(),
                 createUserRequest.lastName());
 
-        return UserMapper.toResponse(userRepository.save(admin));
+        User savedAdmin = userRepository.save(admin);
+        logger.info("Created admin with email {}", savedAdmin.getEmail());
+
+        return UserMapper.toResponse(savedAdmin);
     }
 
     public void deleteUser(String email) {
         userRepository.delete(getUserEntityByEmail(email));
+        logger.info("Deleted user with email {}", email);
     }
 
     public UserResponse changePassword(String email, ChangePasswordRequest changePasswordRequest) {
@@ -81,6 +91,10 @@ public class UserService {
 
         user.changePassword(changePasswordRequest.newPassword());
 
-        return UserMapper.toResponse(userRepository.save(user));
+        User userUpdated = userRepository.save(user);
+
+        logger.info("Changed password for user with email {}", email);
+
+        return UserMapper.toResponse(userUpdated);
     }
 }
