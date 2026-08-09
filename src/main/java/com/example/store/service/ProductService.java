@@ -38,9 +38,19 @@ public class ProductService {
     }
 
     public Page<ProductResponse> getAllProducts(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Page cannot be negative");
+        }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("Size must be greater than zero");
+        }
+
         size = Math.min(size, MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, size);
-        return productRepository.findAll(pageable).map(ProductMapper::toResponse);
+
+        return productRepository.findAll(pageable)
+                .map(ProductMapper::toResponse);
     }
 
     public ProductResponse createProduct(CreateProductRequest createProductRequest) {

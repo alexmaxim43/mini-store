@@ -31,6 +31,20 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    private Pageable createPageable(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Page cannot be negative");
+        }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("Size must be greater than zero");
+        }
+
+        size = Math.min(size, MAX_PAGE_SIZE);
+
+        return PageRequest.of(page, size);
+    }
+
     private User getUserEntityByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -42,15 +56,15 @@ public class UserService {
     }
 
     public Page<UserResponse> getAllUsers(int page, int size) {
-        size = Math.min(size, MAX_PAGE_SIZE);
-        Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findAll(pageable).map(UserMapper::toResponse);
+        Pageable pageable = createPageable(page, size);
+        return userRepository.findAll(pageable)
+                .map(UserMapper::toResponse);
     }
 
     public Page<UserResponse> getUsersByRole(Role role, int page, int size) {
-        size = Math.min(size, MAX_PAGE_SIZE);
-        Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findByRole(role, pageable).map(UserMapper::toResponse);
+        Pageable pageable = createPageable(page, size);
+        return userRepository.findByRole(role, pageable)
+                .map(UserMapper::toResponse);
     }
 
     public UserResponse createCustomer(CreateUserRequest createUserRequest) {

@@ -62,20 +62,6 @@ public class User {
         return role;
     }
 
-    public void setFirstName(String firstName) {
-        if (firstName == null || firstName.isBlank()){
-            throw new IllegalArgumentException("First Name cannot be null or empty");
-        }
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        if (lastName == null || lastName.isBlank()){
-            throw new IllegalArgumentException("Last Name cannot be null or empty");
-        }
-        this.lastName = lastName;
-    }
-
     public void changePassword(String password) {
         if (password == null || password.isBlank()){
             throw new IllegalArgumentException("Password cannot be null or empty");
